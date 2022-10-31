@@ -6,7 +6,7 @@
 /*   By: aachfenn <aachfenn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/27 15:25:38 by aachfenn          #+#    #+#             */
-/*   Updated: 2022/10/29 18:26:53 by aachfenn         ###   ########.fr       */
+/*   Updated: 2022/10/31 17:40:05 by aachfenn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 int ft_strlen(const char *s)
 {
 	int i;
-
+ 
 	i = 0;
 	if (!s)
 		return (0);
@@ -55,21 +55,22 @@ void	*ft_memcpy(void *dest, const void *src, size_t n)
 
 char    *ft_strjoin(char *s1, char *s2)
 {
-    char    *s;
-    int        i;
-    int        j;
+	char    *s;
+	int        i;
+	int        j;
 
-    if (!s1 && !s2)
-        return (NULL);
-    i = ft_strlen(s1);
-    j = ft_strlen(s2);
-    s = (char *)malloc((i + j + 1) * sizeof(char));
-    if (!s)
-        return (NULL);
-    ft_memcpy(s, s1, i);
-    ft_memcpy(s + i, s2, j);
-    s[i + j] = '\0';
-    return (s);
+	if (!s1 && !s2)
+		return (NULL);
+	i = ft_strlen(s1);
+	j = ft_strlen(s2);
+	s = (char *)malloc((i + j + 1) * sizeof(char));
+	if (!s)
+		return (NULL);
+	ft_memcpy(s, s1, i);
+	ft_memcpy(s + i, s2, j);
+	s[i + j] = '\0';
+	free(s1);
+	return (s);
 }
 
 
@@ -100,20 +101,23 @@ char	*reader(char *container, int fd)
 {
 	char		*buf;
 	int			p;
-
+	
+	buf = malloc(BUFFER_SIZE + 1);
+	if (!buf)
+		return (NULL);
 	p = 1;
-	while (p > 0)
+	while (!(ft_strchr(container, '\n')) && p != 0)
 	{
-		buf = malloc(BUFFER_SIZE + 1);
 		p = read(fd, buf, BUFFER_SIZE);
+		if (p == -1)
+		{
+			free(buf);
+			return (NULL);
+		}
 		buf[p] = '\0';
 		container = ft_strjoin(container, buf);
-		if (!container)
-			break ;
-		if (ft_strchr(buf, '\n'))
-			break ;
 	}
-	free (buf);
+	free (buf); 
 	return (container);
 }
 // int main()
@@ -136,13 +140,13 @@ char	*get_ligne(char *container)
 
 	i = 0;
 	k = 0;
-	// if (!container[i])
-	// 	return (NULL);
+	if (!container[i])
+		return (NULL);
 	while (container[i] && container[i] != '\n')
 	{
 		i++;
 	}
-	p = malloc((i + 1));
+	p = malloc((i + 2));
 	if (!p)
 		return (NULL);
 	i = 0;
@@ -152,6 +156,8 @@ char	*get_ligne(char *container)
 		k++;
 		i++;
 	}
+	if (container[i] == '\n')
+		p[k++] = '\n';
 	p[k] = '\0';
 	return (p);
 }
@@ -161,8 +167,8 @@ char	*get_ligne(char *container)
 // 	int fd;
 // 	static char *container;
 // 	fd = open("text.txt" ,O_RDONLY);
-// 	char *s = reader(container, fd);
-// 	printf("%s", get_line(s));
+// 	container = reader(container, fd);
+// 	printf("%s.", get_ligne(container));
 // }
 //----------------------------------------------------------------------------\\
 
@@ -180,10 +186,17 @@ char	*cleaner(char *container)
 	{
 		i++;
 	}
-	p = malloc((ft_strlen(container) - i + 1));
+	if (!container[i])
+	{
+		free (container);
+		return (NULL);
+	}
+	p = malloc(ft_strlen(container) - i + 1);
 	if (!p)
-		// free(container);
-		return (0);
+	{
+		// free(p);
+		return (NULL);
+	}
 	i++;
 	k = 0;
 	while (container[i])
