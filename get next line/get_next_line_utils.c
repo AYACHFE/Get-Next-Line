@@ -6,16 +6,16 @@
 /*   By: aachfenn <aachfenn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/27 15:25:38 by aachfenn          #+#    #+#             */
-/*   Updated: 2022/10/31 17:40:05 by aachfenn         ###   ########.fr       */
+/*   Updated: 2022/11/01 12:37:41 by aachfenn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int ft_strlen(const char *s)
+int	ft_strlen(const char *s)
 {
-	int i;
- 
+	int	i;
+
 	i = 0;
 	if (!s)
 		return (0);
@@ -25,65 +25,54 @@ int ft_strlen(const char *s)
 	}
 	return (i);
 }
+
 //
 //----------------------------------------------------------------------------\\
 //
 
-void	*ft_memcpy(void *dest, const void *src, size_t n)
+char	*ft_strjoin(char *s1, char*s2)
 {
-	char	*des;
-	char	*sr;
-	size_t	i;
+	int		i;
+	int		j;
+	char	*p;
+	int		len;
+	int		k;
 
+	k = 0;
 	i = 0;
-	des = dest;
-	sr = (char *)src;
-	if (!des && !src)
-	{
-		return (0);
-	}
-	while (n > i)
-	{
-		des[i] = sr[i];
-		i++;
-	}
-	return (des);
-}
-//
-//----------------------------------------------------------------------------\\
-//
-
-char    *ft_strjoin(char *s1, char *s2)
-{
-	char    *s;
-	int        i;
-	int        j;
-
+	j = 0;
 	if (!s1 && !s2)
 		return (NULL);
-	i = ft_strlen(s1);
-	j = ft_strlen(s2);
-	s = (char *)malloc((i + j + 1) * sizeof(char));
-	if (!s)
+	len = ft_strlen(s1) + ft_strlen(s2);
+	p = malloc(sizeof(char) * (len + 1));
+	if (!p)
 		return (NULL);
-	ft_memcpy(s, s1, i);
-	ft_memcpy(s + i, s2, j);
-	s[i + j] = '\0';
+	while (s1 && s1[i])
+		p[k++] = s1[i++];
+	while (s2 && s2[j])
+		p[k++] = s2[j++];
+	p[k] = '\0';
 	free(s1);
-	return (s);
+	return (p);
 }
-
+//
+//----------------------------------------------------------------------------\\
+//
 
 char	*ft_strchr(const char *s, int c)
 {
 	int		i;
 	char	*s1;
+	char	c1;
 
 	s1 = (char *)s;
+	c1 = (char )c;
+	if (!s)
+		return (0);
 	i = 0;
-	while (i < ft_strlen(s))
+	while (s[i] != '\0')
 	{
-		if (s1[i] == (char )c)
+		if (s1[i] == c1)
 		{
 			return (&s1[i]);
 		}
@@ -94,52 +83,14 @@ char	*ft_strchr(const char *s, int c)
 
 //----------------------------------------------------------------------------\\
 
-//{reader()}we will need a function that will read from our file descriptor using
-//the BUFFER_SIZE until we find the \n.(after copying thr buffer size we join the strings)
+// // {get_line()}is  a function that copy from the reader() to this function .
 
-char	*reader(char *container, int fd)
-{
-	char		*buf;
-	int			p;
-	
-	buf = malloc(BUFFER_SIZE + 1);
-	if (!buf)
-		return (NULL);
-	p = 1;
-	while (!(ft_strchr(container, '\n')) && p != 0)
-	{
-		p = read(fd, buf, BUFFER_SIZE);
-		if (p == -1)
-		{
-			free(buf);
-			return (NULL);
-		}
-		buf[p] = '\0';
-		container = ft_strjoin(container, buf);
-	}
-	free (buf); 
-	return (container);
-}
-// int main()
-// {
-// 	int fd;
-// 	static char *container;
-// 	fd = open("text.txt" ,O_RDONLY);
-// 	printf("%s", reader(container, fd));
-// }
-
-//----------------------------------------------------------------------------\\
-
-// // {get_line}then we will need a function that copy from the reader() to this function .
-
-char	*get_ligne(char *container)
+char	*ft_get_line(char *container)
 {
 	int		i;
-	int		k;
 	char	*p;
 
 	i = 0;
-	k = 0;
 	if (!container[i])
 		return (NULL);
 	while (container[i] && container[i] != '\n')
@@ -152,13 +103,12 @@ char	*get_ligne(char *container)
 	i = 0;
 	while (container[i] && container[i] != '\n')
 	{
-		p[k] = container[i];
-		k++;
+		p[i] = container[i];
 		i++;
 	}
 	if (container[i] == '\n')
-		p[k++] = '\n';
-	p[k] = '\0';
+		p[i++] = '\n';
+	p[i] = '\0';
 	return (p);
 }
 
@@ -170,41 +120,35 @@ char	*get_ligne(char *container)
 // 	container = reader(container, fd);
 // 	printf("%s.", get_ligne(container));
 // }
+
 //----------------------------------------------------------------------------\\
 
-//{cleaner()}we will need a function that will skip every thing that 
+//{cleaner()}Is a function that will skip every thing that 
 //we copied meaning that will start from(\n + 1).
 
 char	*cleaner(char *container)
 {
-	int i;
-	int k;
-	char *p;
+	int		i;
+	int		k;
+	char	*p;
+	int		len;
 
 	i = 0;
+	len = ft_strlen(container);
 	while (container[i] && container[i] != '\n')
-	{
 		i++;
-	}
-	if (!container[i])
+	if (!container[i] || (container[i] == '\n' && container[i + 1] == '\0'))
 	{
 		free (container);
 		return (NULL);
 	}
-	p = malloc(ft_strlen(container) - i + 1);
+	p = malloc(len - i);
 	if (!p)
-	{
-		// free(p);
 		return (NULL);
-	}
 	i++;
 	k = 0;
 	while (container[i])
-	{
-		p[k] = container[i];
-		k++;
-		i++;
-	}
+		p[k++] = container[i++];
 	p[k] = '\0';
 	free(container);
 	return (p);
